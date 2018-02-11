@@ -8,34 +8,473 @@
     <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.typekit.net/pfk3svw.css">
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+    <style type="text/css">
+      body{
+        font-family: "stevie-sans",sans-serif;
+      }
+      h1,h2,h3{
+        font-weight: 200;
+      }
+      .cover{
+        width: 64px;
+        height: 64px;
+      }
+      .cover img{
+        width: 100%;
+        min-width: 64px;
+        height: auto;
+      }
+      .chart-list-rank{
+        text-align: center;
+        min-width: 30px;
+      }
+      .top-tracks-wrapper{
+        height: 50vh;
+        min-height: 700px;
+        overflow-y:scroll;
+        position: relative;
+      }
+      .top-tracks-wrapper:after{
+        content: "";
+        position: absolute;
+        height: 50px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+        z-index: 1;
+      }
+      .display-1 small{
+        font-size: 1.5rem;
+      }
+      .user-info{
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+      }
+      .user-info:before{
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to right, rgba(0,255,255,.5), rgba(255,0,0,.8));
+        z-index: 1;
+      }
+      .user-info .container{
+        position: relative;
+        z-index: 2;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+
     <script type="text/babel">
-      function getUsername(){
-        return "Markus";
+      function getHashParams() {
+        var hashParams = {};
+        var e, r = /([^&;=]+)=?([^&;]*)/g,
+            q = window.location.hash.substring(1);
+        while ( e = r.exec(q)) {
+           hashParams[e[1]] = decodeURIComponent(e[2]);
+        }
+        return hashParams;
       }
-      const header = <div class="jumbotron"><h1 class="display-1">Hallo {getUsername()}!</h1></div>;
+
+      // Main App
+      class App extends React.Component{
+        constructor(props){
+          super(props);
+          this.state = {
+            isLoggedIn: false,
+            accessToken: null
+          };
+        }
+        componentWillMount(){
+          var params = getHashParams();
+          if(params.access_token){
+            this.setState({
+              isLoggedIn: true
+            });
+            this.setState({
+              accessToken: params.access_token
+            });
+          }
+        }
+        render(){
+            if(this.state.isLoggedIn){
+              return(
+                <div>
+                  <UserInfo token={this.state.accessToken} />
+                  <TopTracks token={this.state.accessToken} />
+                  <TopArtists token={this.state.accessToken} />
+                </div>
+              );
+            }else
+            return(
+              <div className="jumbotron jumbotron-fluid">
+                <div className="container">
+                  <LoginButton/>
+                </div>
+              </div>
+            );
+        }
+      }
+
+
+      // Top Artists Component
+      class TopArtists extends React.Component{
+        constructor(props){
+          super(props);
+          this.state = {
+            error: null,
+            isLoaded: false,
+            artists: [],
+          };
+        }
+        componentWillMount() {
+          var requestConfig = {
+                method: 'GET',
+                headers: new Headers({
+                  'Authorization': 'Bearer ' + this.props.token
+                })
+              };
+          fetch("https://api.spotify.com/v1/me/top/artists?time_range=long_term",requestConfig)
+            .then(res => res.json())
+            .then(
+              (result) => {
+                this.setState({
+                  isLoaded: true,
+                  artists: result
+                });
+              },
+              (error) => {
+                this.setState({
+                  isLoaded: true,
+                  error
+                });
+              }
+            );
+        }
+        render(){
+          const { error, isLoaded, artists } = this.state;
+          if(isLoaded){
+            const artists = this.state.artists.items;
+            return(
+              <div className="container-fluid p-5 bg-light">
+                <div className="container my-5">
+                  <h2>Your Top 20 Artists</h2>
+                </div>
+                <div className="row my-5 no-gutters">
+                  {artists.map((artist, index) =>
+                    <ArtistItem key={artist.id} rank={index} name={artist.name} link={artist.external_urls.spotify} followers={artist.genre} image={artist.images[2].url} />
+                  )}
+                </div>
+              </div>
+            );
+          }else{
+            return null;
+          }
+        }
+      }
+      // Top Artists List Item
+      function ArtistItem(props){
+        return(
+          <div className="col-12 col-sm 6 col-md-3">
+            <div className="card text-light">
+              <img src={props.image} alt={props.name} className="card-img" />
+              <div className="card-img-overlay">
+                <h5 className="card-title"><a target="_blank" href={props.link}>{props.rank + 1}. {props.name}</a></h5>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+
+
+
+      // Top Tracks Component
+      class TopTracks extends React.Component{
+        constructor(props){
+          super(props);
+          this.state = {
+            error: null,
+            tracksLoaded: false,
+            tracksMetadataLoaded: false,
+            tracks: [],
+            tracksMetadata: []
+          };
+        }
+        componentWillMount() {
+          var requestConfig = {
+                method: 'GET',
+                headers: new Headers({
+                  'Authorization': 'Bearer ' + this.props.token
+                })
+              };
+          fetch("https://api.spotify.com/v1/me/top/tracks?time_range=long_term",requestConfig)
+            .then(res => res.json())
+            .then(
+              (result) => {
+                this.setState({
+                  tracksLoaded: true,
+                  tracks: result
+                });
+                console.log(result);
+                this.getTracksMetadata();
+              },
+              (error) => {
+                this.setState({
+                  tracksLoaded: true,
+                  error
+                });
+              }
+            );
+        }
+        getTracksMetadata(){
+          var trackIds = '';
+          var tracks = this.state.tracks.items;
+          if(this.state.tracksLoaded){
+            tracks.map((track) => trackIds += track.id+",");
+            trackIds = trackIds.substring(0,trackIds.length-1);
+            var requestConfig = {
+                  method: 'GET',
+                  headers: new Headers({
+                    'Authorization': 'Bearer ' + this.props.token
+                  })
+                };
+            fetch("https://api.spotify.com/v1/audio-features/?ids="+encodeURIComponent(trackIds),requestConfig)
+              .then(res => res.json())
+              .then(
+                (result) => {
+                  this.setState({
+                    tracksMetadataLoaded: true,
+                    tracksMetadata: this.calculateTracksMetadataAvg(result.audio_features)
+                  });
+                },
+                (error) => {
+                  this.setState({
+                    tracksMetadataLoaded: true,
+                    error
+                  });
+                }
+              );
+          }
+        }
+        calculateTracksMetadataAvg(tracksMetaData){
+          var metaData = {};
+          var tempoAvg = 0;
+          var danceabilityAvg = 0;
+          var energyAvg = 0;
+          var valenceAvg = 0;
+
+          var allTrackStats = tracksMetaData.map(obj => {
+            tempoAvg += obj.tempo;
+            danceabilityAvg += obj.danceability;
+            energyAvg += obj.energy;
+            valenceAvg += obj.valence;
+          });
+          metaData.danceability = Math.round((danceabilityAvg/20)*100);
+          metaData.energy = Math.round((energyAvg/20)*100);
+          metaData.tempo = Math.round(tempoAvg/20);
+          metaData.valence = Math.round((valenceAvg/20)*100);
+
+          return metaData;
+        }
+        render(){
+          const { error, tracksLoaded, tracksMetadataLoaded, tracksMetadata, tracks } = this.state;
+          if(tracksLoaded && tracksMetadataLoaded){
+            const tracksMetadata = this.state.tracksMetadata;
+            const tracks = this.state.tracks.items;
+            return(
+              <div>
+                <div className="container py-5">
+                  <div className="my-5">
+                    <div className="d-flex align-items-center">
+                      <h2 className="m-0 p-0 mr-4">Your Top 20 Tracks</h2>
+                      <PeriodMenu />
+                    </div>
+                    <div className="top-tracks-wrapper my-5">
+                      <ul className="top-tracks list-group list-group-flush">
+                        {tracks.map((track, index) =>
+                          <TrackItem key={track.id} rank={index} name={track.name} artist={track.artists[0].name} album={track.album.name} link={track.external_urls.spotify} image={track.album.images[2].url} />
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-primary py-5">
+                  <div className="container my-5">
+                    <h2 className="text-light">Characteristics of your Top Tracks</h2>
+                    <div className="row my-5">
+                      <TrackStat title="Danceability" stat={tracksMetadata.danceability} unit="%" progressbar="1">
+                        <p className="card-text">Danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0% is least danceable and 100% is most danceable.</p>
+                      </TrackStat>
+                      <TrackStat title="Energy" stat={tracksMetadata.energy} unit="%" progressbar="1">
+                        <p className="card-text">Energy represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy. Perceptual features contributing to this attribute include dynamic range, perceived loudness, timbre, onset rate, and general entropy.</p>
+                      </TrackStat>
+                      <TrackStat title="Happiness" stat={tracksMetadata.valence} unit="%" progressbar="1">
+                        <p className="card-text">A measure describing the musical positiveness conveyed by a track. Tracks with high happiness sound more positive (e.g. happy, cheerful, euphoric), while tracks with low happiness sound more negative (e.g. sad, depressed, angry).</p>
+                      </TrackStat>
+                      <TrackStat title="Average Tempo" stat={tracksMetadata.tempo} unit="bpm" progressbar="0">
+                        <p className="card-text">The overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace of a given piece and derives directly from the average beat duration.</p>
+                      </TrackStat>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          }else{
+            return null;
+          }
+        }
+      }
+      // Top Tracks List Component
+      function TrackItem(props){
+        return(
+          <li className="list-group-item px-0 d-flex align-items-center">
+            <p className="top-tracks-rank lead font-weight-bold text-muted m-0 mr-4">{props.rank + 1}</p>
+            <figure className="cover figure-img m-0 mr-4">
+              <img src={props.image} className="cover img-fluid" />
+            </figure>
+            <h4 className="m-0">
+              <a target="_blank" href={props.link}>{props.name}</a> <small className="text-muted">{props.artist} - {props.album}</small>
+            </h4>
+          </li>
+        );
+      }
+      // Track Stat Component
+      function TrackStat(props){
+        return(
+          <div className="col-12 col-sm-6">
+            <div className="card mb-4">
+              <div className="card-body">
+                <h3 className="text-primary">{props.title}</h3>
+                <p className="text-primary display-1">{props.stat} <small>{props.unit}</small></p>
+                {props.progressbar > 0 &&
+                  <div className="progress mb-4" style={{height: "25px"}}>
+                    <div className="progress-bar" role="progressbar" style={{width: props.stat + "%"}} aria-valuenow={props.stat} aria-valuemin="0" aria-valuemax="100">{props.stat} %</div>
+                  </div>
+                }
+                {props.children}
+              </div>
+            </div>
+          </div>
+        );
+      }
+      // Key Comparison Component
+      function TrackKey(props){
+        return(
+          <div className="card">
+            <h3>Key</h3>
+            <div className="progress">
+              <div className="progress-bar" role="progressbar" style={{width: props.stat + "%"}} aria-valuenow={props.stat} aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </div>
+        );
+      }
+      // Choose Timeframe
+      function PeriodMenu(props){
+        return(
+          <div className="dropdown show">
+            <a className="btn btn-lg btn-primary dropdown-toggle" href="" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              All time
+            </a>
+            <div className="dropdown-menu" aria-labelledby="dropdownMenuLink">
+              <a className="dropdown-item active" href="">All time</a>
+              <a className="dropdown-item" href="">Last 6 months</a>
+              <a className="dropdown-item" href="">Last 4 weeks</a>
+            </div>
+          </div>
+        );
+      }
+
+
+
+      // User Info Component
+      class UserInfo extends React.Component{
+        constructor(props){
+          super(props);
+          this.state = {
+            error: null,
+            isLoaded: false,
+            userInfo: []
+          };
+        }
+        componentWillMount() {
+          var requestConfig = {
+                method: 'GET',
+                headers: new Headers({
+                  'Authorization': 'Bearer ' + this.props.token
+                })
+              };
+          fetch("https://api.spotify.com/v1/me",requestConfig)
+            .then(res => res.json())
+            .then(
+              (result) => {
+                this.setState({
+                  isLoaded: true,
+                  userInfo: result
+                });
+              },
+              (error) => {
+                this.setState({
+                  isLoaded: true,
+                  error
+                });
+              }
+            )
+        }
+        render(){
+          const { error, isLoaded, userInfo } = this.state;
+          if(isLoaded){
+            return(
+              <div className="user-info jumbotron jumbotron-fluid" style={{backgroundImage: "url("+this.state.userInfo.images[0].url+")"}}>
+                <div className="container">
+                  <div className="d-flex align-items-center">
+                    <Avatar imageurl={this.state.userInfo.images[0].url} />
+                    <Username username={this.state.userInfo.display_name} />
+                  </div>
+                </div>
+              </div>
+            );
+          }else{
+            return null;
+          }
+        }
+      }
+      // Avatar
+      function Avatar(props){
+          return(
+            <img src={props.imageurl} className="img-fluid rounded"/>
+          );
+      }
+      // Username
+      function Username(props){
+        return(
+          <h2 className="display-4 text-light mx-5">{props.username}</h2>
+        );
+      }
+      // Login Button
+      function LoginButton(props){
+        return(
+          <a href="https://accounts.spotify.com/authorize?client_id=2b6e083cbc3c46679c1c8b733cd6fa48&response_type=token&redirect_uri=http://reacttest:8888&scope=user-top-read" className="btn btn-primary btn-lg">Login with Spotify</a>
+        );
+      }
+
       ReactDOM.render(
-        header,
+        <App />,
         document.getElementById('root')
       );
 
     </script>
-    <!--
-      Note: this page is a great way to try React but it's not suitable for production.
-      It slowly compiles JSX with Babel in the browser and uses a large development build of React.
-
-      To set up a production-ready React build environment, follow these instructions:
-      * https://reactjs.org/docs/add-react-to-a-new-app.html
-      * https://reactjs.org/docs/add-react-to-an-existing-app.html
-
-      You can also use React without JSX, in which case you can remove Babel:
-      * https://reactjs.org/docs/react-without-jsx.html
-      * https://reactjs.org/docs/cdn-links.html
-    -->
   </body>
 </html>
