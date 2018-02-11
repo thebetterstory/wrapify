@@ -3,7 +3,7 @@
     "node": ">= 0.10.0"
   },
   "devDependencies": {
-    "gulp": "^4.0.0",
+    "gulp": "^3.9.1",
     "gulp-autoprefixer": "*",
     "gulp-clean-css": "*",
     "gulp-concat": "*",
@@ -17,5 +17,8 @@
     "gulp-sourcemaps": "*",
     "gulp-uglify": "*",
     "gulp-watch": "*"
+  },
+  "dependencies": {
+    "bootstrap": "^4.0.0"
   }
 }

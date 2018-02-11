@@ -1,0 +1,166 @@
+/* TYPOGRAPHY */
+html {
+  font-size: .8rem;
+}
+@include media-breakpoint-up(sm) {
+  html {
+    font-size: 1rem;
+  }
+}
+@include media-breakpoint-up(md) {
+  html {
+    font-size: 1rem;
+  }
+}
+@include media-breakpoint-up(lg) {
+  html {
+    font-size: 1.1rem;
+  }
+}
+p.display-1{
+  line-height: .8;
+}
+
+/* Common BS changes */
+.jumbotron{
+  margin-bottom: 0;
+}
+
+/* Navbar */
+.navbar{
+  .navbar-brand{
+    .brand-claim{
+      color: rgba($white,.5);
+      margin-left: map-get($spacers,4);
+      @include media-breakpoint-down(xs) {
+        font-size: .9rem;
+      }
+    }
+  }
+}
+
+/* Period Menu */
+.period-menu{
+  .btn{
+    font-size: 1rem;
+    @include media-breakpoint-up(sm){
+      font-size: 1.25rem;
+    }
+  }
+}
+
+/* Top Tracks */
+.tracks-header{
+  text-align: center;
+  margin-bottom: map_get($spacers,4);
+  @include media-breakpoint-up(lg){
+    text-align: left;
+    margin-bottom: 0;
+  }
+  h2{
+    margin-bottom: map-get($spacers,4);
+  }
+}
+.cover{
+  width: 64px;
+  height: 64px;
+}
+small{
+  line-height: 1 !important;
+}
+.cover img{
+  width: 100%;
+  min-width: 64px;
+  height: auto;
+}
+.chart-list-rank{
+  text-align: center;
+  min-width: 30px;
+}
+.display-1 small{
+  font-size: 1.5rem;
+}
+
+
+/* Login */
+.login-screen{
+  @extend .text-light;
+  background-image: url(../img/login_bg.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 100vh;
+}
+
+
+/* User Info */
+.user-info{
+  position: relative;
+  overflow: hidden;
+  background-color: $black;
+  .user-info-bg{
+    opacity: .5;
+    background-color: $dark;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    filter: blur(20px);
+  }
+  img{
+    box-shadow: 0px 0px 50px -10px rgba(0,0,0,0.75);
+    border-radius: 50%;
+  }
+  .container{
+    position: relative;
+    z-index: 2;
+  }
+  .user-info-content{
+    text-align: center;
+    @include media-breakpoint-up(md){
+      text-align: left;
+    }
+    .user-info-greeting{
+      margin: 0;
+      @include media-breakpoint-up(md){
+        margin-left: map_get($spacers,4);
+      }
+    }
+    img{
+      margin-bottom: map-get($spacers,4);
+    }
+  }
+}
+
+
+
+/* Artists */
+.top-artist-image{
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  height: 0;
+  padding-top: 100%;
+  width: 100%;
+  border-radius: 50%;
+  position: relative;
+  .top-artist-rank{
+    background: $primary;
+    font-size: 1.5rem;
+    display: block;
+    width: 3rem;
+    height: 3rem;
+    padding: .5rem;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    line-height: 1.4;
+    text-align: center;
+  }
+}

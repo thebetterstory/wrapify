@@ -1,64 +1,22 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<!doctype html>
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <title>Test React</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Wrapify - Check out your Spotify Top Tracks and Artists and get some insights on your musical taste.</title>
     <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.typekit.net/pfk3svw.css">
+    <link rel="stylesheet" href="css/main.min.css">
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
-    <style type="text/css">
-      body{
-        font-family: "stevie-sans",sans-serif;
-      }
-      h1,h2,h3{
-        font-weight: 200;
-      }
-      .cover{
-        width: 64px;
-        height: 64px;
-      }
-      .cover img{
-        width: 100%;
-        min-width: 64px;
-        height: auto;
-      }
-      .chart-list-rank{
-        text-align: center;
-        min-width: 30px;
-      }
-      .display-1 small{
-        font-size: 1.5rem;
-      }
-      .user-info{
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-position: center;
-        position: relative;
-      }
-      /*.user-info:before{
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(to right, rgba(0,255,255,.5), rgba(255,0,0,.8));
-        z-index: 1;
-      }*/
-      .user-info .container{
-        position: relative;
-        z-index: 2;
-      }
-    </style>
+    <script src="js/vendor/vendors.min.js"></script>
   </head>
   <body>
+
     <div id="root"></div>
 
     <script type="text/babel">
@@ -96,16 +54,30 @@ class App extends React.Component {
 	render() {
 		if (this.state.isLoggedIn) {
 			return (
-				<div>
-					<UserInfo token={this.state.accessToken} />
-					<TopTracks token={this.state.accessToken} />
-					<TopArtists token={this.state.accessToken} />
-				</div>
+			    <div className="page-wrap">
+                  <nav className="navbar navbar-dark bg-dark">
+                      <div className="container">
+                          <a className="navbar-brand" href="#"><span className="font-weight-bold text-primary">Wrapify</span> <span className="brand-claim">Your Personal Spotify Statistics</span></a>
+                      </div>
+                  </nav>
+                  <div>
+                      <UserInfo token={this.state.accessToken} />
+                      <TopTracks token={this.state.accessToken} />
+                      <TopArtists token={this.state.accessToken} />
+                  </div>
+                    <nav className="navbar navbar-dark bg-dark text-light">
+                        <div className="container">
+                            <span className="navbar-text">&copy; 2018 Wrapify</span>
+                        </div>
+                    </nav>
+                </div>
 			);
 		} else
 			return (
-				<div className="jumbotron jumbotron-fluid">
-					<div className="container">
+				<div className="login-screen jumbotron jumbotron-fluid d-flex align-items-center">
+					<div className="container text-center py-5">
+                        <h1>Welcome to Wrapify!</h1>
+                        <p className="lead">Check out your Spotify Top Tracks and Artists and get some insights on your musical taste.</p>
 						<LoginButton />
 					</div>
 				</div>
@@ -173,10 +145,14 @@ class TopArtists extends React.Component {
 			return (
 				<div className="container-fluid p-5 bg-dark text-light">
 					<div className="container my-5">
-            <div className="d-flex align-items-center">
-  						<h2 className="m-0 p-0 mr-4">Your Top 20 Artists</h2>
-              <PeriodMenu callbackFromParent={this.periodCallback} />
-            </div>
+                        <div className="tracks-header row">
+                            <div className="col-lg-6">
+                                <h2>Your Top 20 Artists</h2>
+                            </div>
+                            <div className="col-lg-6">
+                                <PeriodMenu callbackFromParent={this.periodCallback} />
+                            </div>
+                        </div>
             <div className="row my-5">
   						{artists.map((artist, index) => (
   							<ArtistItem
@@ -200,15 +176,18 @@ class TopArtists extends React.Component {
 // Top Artists List Item
 function ArtistItem(props) {
 	return (
-		<div className="col-12 col-sm 6 col-md-3 mb-5">
-			<div className="card text-light">
-				<img src={props.image} alt={props.name} className="card-img" />
-				<div className="card-img-overlay">
-					<h5 className="card-title">
+		<div className="col-6 col-sm-3 col-md-3 mb-5">
+			<div className="top-artist text-light text-center">
+              <div className="top-artist-image" style={{backgroundImage: 'url(' + props.image + ')'}}>
+                  <span className="top-artist-rank">{props.rank + 1}</span>
+              </div>
+				<div className="card-body">
+					<p className="artist-title">
+
 						<a target="_blank" href={props.link}>
-							{props.rank + 1}. {props.name}
+							{props.name}
 						</a>
-					</h5>
+					</p>
 				</div>
 			</div>
 		</div>
@@ -349,29 +328,33 @@ class TopTracks extends React.Component {
 			const tracks = this.state.tracks.items;
 			return (
 				<div>
-					<div className="container py-5">
+					<div className="container pt-2">
 						<div className="my-5">
-							<div className="d-flex align-items-center">
-								<h2 className="m-0 p-0 mr-4">Your Top 20 Tracks</h2>
-								<PeriodMenu callbackFromParent={this.periodCallback} />
-							</div>
-              <div className="row">
-                <div className="col-md-6">
-    							<div className="top-tracks-wrapper my-5">
-    								<ul className="top-tracks list-group list-group-flush">
-    									{tracks.map((track, index) => (
-    										<TrackItem
-    											key={track.id}
-    											rank={index}
-    											name={track.name}
-    											artist={track.artists[0].name}
-    											album={track.album.name}
-    											link={track.external_urls.spotify}
-    											image={track.album.images[2].url}
-    										/>
-    									))}
-    								</ul>
-    							</div>
+                          <div className="tracks-header row">
+                              <div className="col-lg-6">
+                                  <h2>Your Top 20 Tracks</h2>
+                              </div>
+                              <div className="col-lg-6">
+                                  <PeriodMenu callbackFromParent={this.periodCallback} />
+                              </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-md-6">
+                              <div className="top-tracks-wrapper my-md-5">
+                                  <ul className="top-tracks list-group list-group-flush">
+                                      {tracks.map((track, index) => (
+                                          <TrackItem
+                                            key={track.id}
+                                            rank={index}
+                                            name={track.name}
+                                            artist={track.artists[0].name}
+                                            album={track.album.name}
+                                            link={track.external_urls.spotify}
+                                            image={track.album.images[2].url}
+                                        />
+                                    ))}
+                                </ul>
+                            </div>
                 </div>
                 <div className="col-md-6">
                     <TrackStat
@@ -379,11 +362,12 @@ class TopTracks extends React.Component {
                       stat={tracksMetadata.danceability}
                       unit="%"
                       progressbar="1">
-                      <p className="card-text">
+                        <p className="card-text text-sm"><small className="text-muted">
                         Danceability describes how suitable a track is for dancing
                         based on a combination of musical elements including tempo,
                         rhythm stability, beat strength, and overall regularity. A
                         value of 0% is least danceable and 100% is most danceable.
+                        </small>
                       </p>
                     </TrackStat>
                     <TrackStat
@@ -391,12 +375,13 @@ class TopTracks extends React.Component {
                       stat={tracksMetadata.energy}
                       unit="%"
                       progressbar="1">
-                      <p className="card-text">
+                        <p className="card-text"><small className="text-muted">
                         Energy represents a perceptual measure of intensity and
                         activity. Typically, energetic tracks feel fast, loud, and
                         noisy. Perceptual features contributing to this attribute
                         include dynamic range, perceived loudness, timbre, onset
                         rate, and general entropy.
+                        </small>
                       </p>
                     </TrackStat>
                     <TrackStat
@@ -405,10 +390,12 @@ class TopTracks extends React.Component {
                       unit="%"
                       progressbar="1">
                       <p className="card-text">
-                        A measure describing the musical positiveness conveyed by a
-                        track. Tracks with high happiness sound more positive (e.g.
-                        happy, cheerful, euphoric), while tracks with low happiness
-                        sound more negative (e.g. sad, depressed, angry).
+                          <small className="text-muted">
+                          A measure describing the musical positiveness conveyed by a
+                          track. Tracks with high happiness sound more positive (e.g.
+                          happy, cheerful, euphoric), while tracks with low happiness
+                          sound more negative (e.g. sad, depressed, angry).
+                        </small>
                       </p>
                     </TrackStat>
                     <TrackStat
@@ -416,11 +403,12 @@ class TopTracks extends React.Component {
                       stat={tracksMetadata.tempo}
                       unit="bpm"
                       progressbar="0">
-                      <p className="card-text">
+                      <p className="card-text"><small className="text-muted">
                         The overall estimated tempo of a track in beats per minute
                         (BPM). In musical terminology, tempo is the speed or pace of
                         a given piece and derives directly from the average beat
                         duration.
+                      </small>
                       </p>
                     </TrackStat>
                 </div>
@@ -445,12 +433,12 @@ function TrackItem(props) {
 				<img src={props.image} className="cover img-fluid" />
 			</figure>
       <p className="m-0">
-        <a target="_blank" className="mr-3" href={props.link}>
+        <a target="_blank" className="mr-3 font-weight-bold" href={props.link}>
           {props.name}
         </a><br/>{' '}
-        <small className="text-muted">
+        <span>
           {props.artist} - {props.album}
-        </small>
+        </span>
       </p>
 		</li>
 	);
@@ -501,7 +489,7 @@ class PeriodMenu extends React.Component {
 		const { period } = this.state;
 		return (
 			<div
-				className="btn-group btn-group-lg"
+				className="period-menu btn-group btn-group-lg"
 				role="group"
 				aria-label="Choose Period">
 				<button
@@ -581,10 +569,10 @@ class UserInfo extends React.Component {
 
 		if (isLoaded) {
 			return (
-				<div
-					className="user-info bg-primary jumbotron jumbotron-fluid">
-					<div className="container">
-						<div className="d-flex align-items-center">
+				<div className="user-info jumbotron jumbotron-fluid">
+                    <div className="user-info-bg" style={{backgroundImage: 'url(' + this.state.userInfo.images[0].url + ')'}}></div>
+					<div className="container py-5">
+						<div className="user-info-content d-md-flex align-items-center">
 							<Avatar imageurl={this.state.userInfo.images[0].url} />
 							<Greeting username={this.state.userInfo.display_name} />
 						</div>
@@ -598,14 +586,14 @@ class UserInfo extends React.Component {
 }
 // Avatar
 function Avatar(props) {
-	return <img src={props.imageurl} className="img-fluid rounded" />;
+	return <img src={props.imageurl} className="img-fluid" />;
 }
 // Greeting
 function Greeting(props) {
 	return (
-    <div className="text-light mx-5">
-    <h2 className="display-4">Hi {props.username},</h2>
-    <p className="lead">Welcome to Wrapify! Check out your Spotify Top Tracks and Artists and get some insights about your musical taste.</p>
+    <div className="user-info-greeting text-light">
+      <h1>Hi {props.username},</h1>
+      <p className="lead">Welcome to Wrapify! Check out your Spotify Top Tracks and Artists and get some insights on your musical taste.</p>
     </div>
   );
 }
@@ -613,7 +601,7 @@ function Greeting(props) {
 function LoginButton(props) {
 	return (
 		<a
-			href="https://accounts.spotify.com/authorize?client_id=2b6e083cbc3c46679c1c8b733cd6fa48&response_type=token&redirect_uri=http://reacttest:8888&scope=user-top-read"
+			href={"https://accounts.spotify.com/authorize?client_id=2b6e083cbc3c46679c1c8b733cd6fa48&response_type=token&redirect_uri=" + window.location.origin + "&scope=user-top-read"}
 			className="btn btn-primary btn-lg">
 			Login with Spotify
 		</a>
